@@ -42,7 +42,7 @@ dependencies:
   flutter_secure_storage: ^9.2.2
 
   # 语音录制：2 个 service（sherpa_onnx_speech_service / speech_recognition_service）
-  record: ^6.2.0
+  record: ^7.1.1
 
   # 云端语音识别：speech_recognition_service 使用
   speech_to_text: ^7.0.0
