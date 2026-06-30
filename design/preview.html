@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>杏铃聊天 · 设计画布</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=Manrope:wght@400;450;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --bg:#0A0A0C;
+    --bg-grain:#0B0B0E;
+    --sidebar:#0E0E11;
+    --surface:#131318;
+    --surface-2:#191920;
+    --surface-3:#202029;
+    --border:rgba(255,255,255,0.06);
+    --border-strong:rgba(255,255,255,0.10);
+    --text:#ECECEE;
+    --text-2:#9A9AA6;
+    --text-3:#5C5C68;
+    --accent:#8B7CFF;
+    --accent-2:#B4A0FF;
+    --accent-soft:rgba(139,124,255,0.14);
+    --teal:#4ADE9D;
+    --teal-soft:rgba(74,222,157,0.12);
+    --amber:#F5B454;
+    --rose:#FF7A8A;
+    --radius:12px;
+    --radius-sm:8px;
+    --shadow:0 1px 0 rgba(255,255,255,0.03) inset, 0 12px 40px -12px rgba(0,0,0,0.6);
+    --font-d:"Sora",system-ui,sans-serif;
+    --font-b:"Manrope",system-ui,sans-serif;
+    --font-m:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{
+    font-family:var(--font-b);
+    background:
+      radial-gradient(1200px 600px at 78% -10%, rgba(139,124,255,0.10), transparent 60%),
+      radial-gradient(900px 500px at 0% 100%, rgba(74,222,157,0.05), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    overflow:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  .app{display:flex;height:100vh;width:100vw}
+
+  /* ───── sidebar ───── */
+  .sidebar{
+    width:280px;flex:0 0 280px;
+    background:var(--sidebar);
+    border-right:1px solid var(--border);
+    display:flex;flex-direction:column;
+    position:relative;
+  }
+  .sidebar::after{
+    content:"";position:absolute;top:0;right:0;bottom:0;width:1px;
+    background:linear-gradient(to bottom, transparent, var(--border) 20%, var(--border) 80%, transparent);
+  }
+  .brand{
+    display:flex;align-items:center;gap:11px;
+    padding:18px 18px 14px;
+  }
+  .brand .logo{
+    width:30px;height:30px;border-radius:9px;
+    background:linear-gradient(135deg, var(--accent), var(--accent-2));
+    display:grid;place-items:center;
+    box-shadow:0 6px 18px -6px rgba(139,124,255,0.7), inset 0 1px 0 rgba(255,255,255,0.25);
+    position:relative;
+  }
+  .brand .logo::after{
+    content:"";position:absolute;inset:0;border-radius:9px;
+    background:radial-gradient(circle at 30% 25%, rgba(255,255,255,0.45), transparent 50%);
+  }
+  .brand .logo svg{position:relative;z-index:1}
+  .brand .name{font-family:var(--font-d);font-weight:600;font-size:15px;letter-spacing:0.2px}
+  .brand .sub{font-size:10.5px;color:var(--text-3);letter-spacing:1.5px;text-transform:uppercase;margin-top:1px}
+
+  .new-chat{
+    margin:4px 14px 12px;
+    display:flex;align-items:center;gap:10px;
+    padding:11px 13px;border-radius:var(--radius);
+    background:linear-gradient(180deg, rgba(139,124,255,0.16), rgba(139,124,255,0.06));
+    border:1px solid rgba(139,124,255,0.28);
+    color:#E8E5FF;font-weight:600;font-size:13.5px;
+    cursor:pointer;transition:.2s;
+    box-shadow:0 1px 0 rgba(255,255,255,0.05) inset;
+  }
+  .new-chat:hover{background:linear-gradient(180deg, rgba(139,124,255,0.24), rgba(139,124,255,0.10));transform:translateY(-1px)}
+  .new-chat .kbd{margin-left:auto;font-family:var(--font-m);font-size:10.5px;color:var(--text-3);font-weight:500}
+
+  .search{
+    margin:0 14px 10px;padding:9px 11px;border-radius:10px;
+    background:var(--surface);border:1px solid var(--border);
+    display:flex;align-items:center;gap:9px;color:var(--text-3);
+    font-size:13px;
+  }
+  .search input{flex:1;background:none;border:0;outline:0;color:var(--text);font-family:var(--font-b);font-size:13px}
+  .search input::placeholder{color:var(--text-3)}
+
+  .list-label{
+    padding:8px 18px 6px;font-size:10.5px;letter-spacing:1.4px;
+    text-transform:uppercase;color:var(--text-3);font-weight:600;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .list-label .count{color:var(--text-3);font-family:var(--font-m);font-size:10px}
+  .conv-scroll{flex:1;overflow-y:auto;padding:0 8px 8px}
+  .conv-scroll::-webkit-scrollbar{width:6px}
+  .conv-scroll::-webkit-scrollbar-thumb{background:var(--surface-2);border-radius:3px}
+
+  .conv{
+    padding:10px 11px;border-radius:10px;cursor:pointer;
+    display:flex;flex-direction:column;gap:3px;
+    border:1px solid transparent;margin-bottom:2px;
+    transition:.15s;position:relative;
+  }
+  .conv:hover{background:var(--surface)}
+  .conv.active{
+    background:var(--surface-2);
+    border-color:var(--border-strong);
+    box-shadow:inset 0 0 0 1px rgba(139,124,255,0.10);
+  }
+  .conv.active::before{
+    content:"";position:absolute;left:-8px;top:8px;bottom:8px;width:2.5px;
+    background:linear-gradient(var(--accent),var(--accent-2));border-radius:2px;
+  }
+  .conv .t{display:flex;align-items:center;gap:7px}
+  .conv .t .name{font-size:13.5px;font-weight:500;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .conv .dot{width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px var(--teal)}
+  .conv .preview{font-size:11.5px;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .conv .meta{display:flex;align-items:center;gap:8px;margin-top:1px}
+  .conv .meta .svc{font-size:10px;color:var(--text-3);font-family:var(--font-m);padding:1px 6px;border:1px solid var(--border);border-radius:4px}
+  .conv .meta .time{font-size:10.5px;color:var(--text-3);margin-left:auto}
+
+  .sidebar-foot{
+    padding:10px 8px;border-top:1px solid var(--border);
+    display:flex;flex-direction:column;gap:2px;
+  }
+  .foot-item{
+    display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;
+    color:var(--text-2);font-size:13px;cursor:pointer;transition:.15s;
+  }
+  .foot-item:hover{background:var(--surface);color:var(--text)}
+  .foot-item .ic{width:16px;height:16px;flex:0 0 16px;opacity:.85}
+  .foot-item.active{background:var(--surface-2);color:var(--text)}
+  .foot-item .badge{margin-left:auto;font-size:10px;font-family:var(--font-m);color:var(--text-3)}
+
+  /* ───── main ───── */
+  .main{flex:1;display:flex;flex-direction:column;min-width:0;position:relative}
+  .topbar{
+    height:54px;flex:0 0 54px;
+    border-bottom:1px solid var(--border);
+    display:flex;align-items:center;gap:14px;padding:0 22px;
+    background:rgba(10,10,12,0.6);backdrop-filter:blur(12px);
+  }
+  .topbar .title{font-family:var(--font-d);font-weight:600;font-size:14.5px}
+  .topbar .model-chip{
+    display:flex;align-items:center;gap:7px;padding:5px 10px 5px 8px;border-radius:7px;
+    background:var(--surface);border:1px solid var(--border);font-size:12px;color:var(--text-2);cursor:pointer;
+  }
+  .topbar .model-chip:hover{border-color:var(--border-strong);color:var(--text)}
+  .topbar .model-chip .av{width:14px;height:14px;border-radius:4px;background:linear-gradient(135deg,#5B8DEF,#7C6FF0)}
+  .topbar .spacer{flex:1}
+  .topbar .icon-btn{
+    width:32px;height:32px;border-radius:8px;display:grid;place-items:center;color:var(--text-2);cursor:pointer;
+  }
+  .topbar .icon-btn:hover{background:var(--surface);color:var(--text)}
+  .live-dot{display:inline-flex;align-items:center;gap:6px;color:var(--teal);font-size:11.5px;font-family:var(--font-m)}
+  .live-dot::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px var(--teal);animation:pulse 1.6s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+  .scroll{flex:1;overflow-y:auto;padding:28px 0}
+  .scroll::-webkit-scrollbar{width:8px}
+  .scroll::-webkit-scrollbar-thumb{background:var(--surface-2);border-radius:4px}
+  .thread{max-width:780px;margin:0 auto;padding:0 28px;display:flex;flex-direction:column;gap:22px}
+
+  .msg{display:flex;gap:13px;align-items:flex-start}
+  .av{
+    width:30px;height:30px;border-radius:9px;flex:0 0 30px;
+    display:grid;place-items:center;font-size:13px;font-weight:600;
+    border:1px solid var(--border);
+  }
+  .av.user{background:var(--surface-2);color:var(--text-2)}
+  .av.ai{background:linear-gradient(135deg,rgba(139,124,255,0.25),rgba(180,160,255,0.10));color:var(--accent-2);border-color:rgba(139,124,255,0.25)}
+  .msg .body{flex:1;min-width:0;padding-top:3px}
+  .msg .who{font-size:12px;color:var(--text-3);margin-bottom:5px;font-weight:500;letter-spacing:.3px}
+  .bubble{font-size:14px;line-height:1.7;color:var(--text);word-wrap:break-word}
+  .bubble code{font-family:var(--font-m);font-size:12.5px;background:var(--surface-2);padding:2px 6px;border-radius:5px;color:var(--accent-2)}
+  .bubble pre{font-family:var(--font-m);font-size:12.5px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:13px 14px;margin:10px 0;overflow-x:auto;line-height:1.55}
+  .bubble pre .kw{color:var(--accent-2)} .bubble pre .str{color:var(--teal)} .bubble pre .cmt{color:var(--text-3)}
+
+  .user-bubble{
+    background:var(--surface-2);border:1px solid var(--border);
+    padding:11px 14px;border-radius:12px;display:inline-block;max-width:100%;
+  }
+
+  .reasoning{
+    margin:2px 0 4px;border:1px solid var(--border);border-radius:10px;
+    background:rgba(20,20,26,0.5);overflow:hidden;
+  }
+  .reasoning .rh{
+    display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer;
+    font-size:12px;color:var(--text-2);
+  }
+  .reasoning .rh .ic{color:var(--accent-2)}
+  .reasoning .rh .lbl{flex:1;font-weight:500}
+  .reasoning .rh .ts{font-family:var(--font-m);font-size:11px;color:var(--text-3)}
+  .reasoning .rb{padding:0 12px 12px;font-size:13px;line-height:1.65;color:var(--text-2);font-family:var(--font-m)}
+
+  .sources{
+    margin-top:10px;border:1px dashed var(--border-strong);border-radius:10px;
+    padding:9px 12px;background:rgba(74,222,157,0.03);
+  }
+  .sources .sh{font-size:11px;color:var(--teal);font-weight:600;letter-spacing:.6px;margin-bottom:7px;display:flex;align-items:center;gap:7px}
+  .sources .src{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--text-2);padding:4px 0}
+  .sources .src .n{font-family:var(--font-m);font-size:10px;color:var(--text-3);width:14px}
+  .sources .src .tt{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sources .src a{color:var(--text-3);font-family:var(--font-m);font-size:11px}
+
+  .streaming-row{display:flex;align-items:center;gap:9px;color:var(--accent-2);font-size:13px;font-family:var(--font-m)}
+  .streaming-row .caret{display:inline-block;width:7px;height:15px;background:var(--accent-2);animation:blink 1s steps(2) infinite;border-radius:1px;vertical-align:-2px}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+  .msg-actions{display:flex;gap:2px;margin-top:8px;opacity:0;transition:.15s}
+  .msg:hover .msg-actions{opacity:1}
+  .msg-actions button{
+    background:none;border:0;color:var(--text-3);font-size:11px;cursor:pointer;
+    padding:4px 7px;border-radius:6px;display:flex;align-items:center;gap:5px;
+  }
+  .msg-actions button:hover{background:var(--surface);color:var(--text-2)}
+
+  /* ───── composer ───── */
+  .composer-wrap{flex:0 0 auto;padding:0 28px 22px}
+  .composer{
+    max-width:780px;margin:0 auto;
+    background:var(--surface);border:1px solid var(--border);border-radius:14px;
+    box-shadow:var(--shadow);transition:.2s;
+  }
+  .composer:focus-within{border-color:rgba(139,124,255,0.4);box-shadow:0 0 0 3px rgba(139,124,255,0.08), var(--shadow)}
+  .composer .ta{
+    width:100%;background:none;border:0;outline:0;resize:none;
+    color:var(--text);font-family:var(--font-b);font-size:14px;line-height:1.6;
+    padding:14px 16px 4px;max-height:200px;min-height:24px;
+  }
+  .composer .ta::placeholder{color:var(--text-3)}
+  .composer .row{display:flex;align-items:center;gap:8px;padding:8px 10px 10px}
+  .composer .tool{
+    display:flex;align-items:center;gap:7px;padding:7px 10px;border-radius:8px;
+    background:transparent;border:1px solid var(--border);color:var(--text-2);font-size:12px;cursor:pointer;
+  }
+  .composer .tool:hover{background:var(--surface-2);color:var(--text)}
+  .composer .tool.on{background:var(--teal-soft);border-color:rgba(74,222,157,0.3);color:var(--teal)}
+  .composer .tool .ic{width:14px;height:14px}
+  .composer .tok{font-family:var(--font-m);font-size:11px;color:var(--text-3);margin-left:auto}
+  .composer .tok b{color:var(--text-2);font-weight:500}
+  .composer .send{
+    width:34px;height:34px;border-radius:9px;border:0;cursor:pointer;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#0A0A0C;
+    display:grid;place-items:center;box-shadow:0 6px 16px -6px rgba(139,124,255,0.7);
+    transition:.15s;
+  }
+  .composer .send:hover{transform:translateY(-1px);filter:brightness(1.08)}
+  .composer .send.stop{background:var(--surface-3);color:var(--rose);box-shadow:none}
+  .hint{text-align:center;font-size:11px;color:var(--text-3);margin-top:9px}
+
+  /* ───── empty state ───── */
+  .empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;text-align:center}
+  .empty .orb{
+    width:74px;height:74px;border-radius:22px;margin-bottom:22px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    box-shadow:0 14px 40px -10px rgba(139,124,255,0.6), inset 0 1px 0 rgba(255,255,255,0.3);
+    display:grid;place-items:center;position:relative;
+  }
+  .empty .orb::after{content:"";position:absolute;inset:0;border-radius:22px;background:radial-gradient(circle at 30% 25%, rgba(255,255,255,0.5), transparent 55%)}
+  .empty h1{font-family:var(--font-d);font-weight:600;font-size:26px;margin:0 0 8px;letter-spacing:-0.2px}
+  .empty p{color:var(--text-2);font-size:14px;margin:0 0 28px;max-width:480px;line-height:1.6}
+  .empty .prompts{display:grid;grid-template-columns:repeat(2,minmax(220px,1fr));gap:10px;max-width:560px}
+  .empty .prompt{
+    text-align:left;padding:13px 14px;border-radius:11px;cursor:pointer;
+    background:var(--surface);border:1px solid var(--border);transition:.15s;
+  }
+  .empty .prompt:hover{border-color:var(--border-strong);background:var(--surface-2);transform:translateY(-1px)}
+  .empty .prompt .pt{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px}
+  .empty .prompt .pp{font-size:11.5px;color:var(--text-3);line-height:1.45}
+
+  /* ───── settings view ───── */
+  .settings-view{flex:1;overflow-y:auto}
+  .settings-wrap{max-width:780px;margin:0 auto;padding:30px 28px 80px}
+  .settings-h{font-family:var(--font-d);font-weight:600;font-size:22px;margin:0 0 4px;letter-spacing:-0.2px}
+  .settings-sub{color:var(--text-2);font-size:13.5px;margin:0 0 26px}
+  .sec{margin-bottom:22px}
+  .sec-title{font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:var(--text-3);font-weight:600;margin:0 4px 9px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+  .row-item{display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid var(--border)}
+  .row-item:last-child{border-bottom:0}
+  .row-item .ic-w{width:32px;height:32px;border-radius:9px;background:var(--surface-2);display:grid;place-items:center;color:var(--text-2);flex:0 0 32px}
+  .row-item .lbl{flex:1}
+  .row-item .lbl .n{font-size:13.5px;font-weight:500}
+  .row-item .lbl .d{font-size:12px;color:var(--text-3);margin-top:2px}
+  .toggle{width:38px;height:22px;border-radius:11px;background:var(--surface-3);position:relative;cursor:pointer;transition:.2s;flex:0 0 38px}
+  .toggle::after{content:"";position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:var(--text-2);transition:.2s}
+  .toggle.on{background:linear-gradient(135deg,var(--accent),var(--accent-2))}
+  .toggle.on::after{left:18px;background:#fff}
+
+  .ai-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:12px}
+  .ai-card{padding:11px 10px;border-radius:10px;background:var(--surface-2);border:1px solid var(--border);cursor:pointer;text-align:center;transition:.15s;position:relative}
+  .ai-card:hover{border-color:var(--border-strong);transform:translateY(-1px)}
+  .ai-card.sel{border-color:rgba(139,124,255,0.5);background:var(--accent-soft);box-shadow:0 0 0 2px rgba(139,124,255,0.12)}
+  .ai-card .ic{width:26px;height:26px;border-radius:7px;margin:0 auto 7px;display:grid;place-items:center;font-size:11px;font-weight:700;color:#fff}
+  .ai-card .nm{font-size:11.5px;color:var(--text-2);font-weight:500}
+  .ai-card.sel .nm{color:var(--text)}
+  .ai-card .chk{position:absolute;top:6px;right:6px;color:var(--accent-2);opacity:0}
+  .ai-card.sel .chk{opacity:1}
+
+  .field{padding:14px 16px}
+  .field .fl{font-size:12px;color:var(--text-2);margin-bottom:7px;font-weight:500;display:flex;align-items:center;gap:6px}
+  .field .fl .req{color:var(--rose)}
+  .input{width:100%;background:var(--bg-grain);border:1px solid var(--border);border-radius:9px;padding:10px 12px;color:var(--text);font-family:var(--font-b);font-size:13px;outline:none;transition:.15s}
+  .input:focus{border-color:rgba(139,124,255,0.4);box-shadow:0 0 0 3px rgba(139,124,255,0.08)}
+  .input.mono{font-family:var(--font-m);font-size:12.5px}
+  .select-row{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--border)}
+  .select-row .l{font-size:13.5px}
+  .select-row .v{font-family:var(--font-m);font-size:12.5px;color:var(--accent-2);cursor:pointer}
+
+  .slider-row{padding:14px 16px}
+  .slider-row .top{display:flex;justify-content:space-between;font-size:13px;margin-bottom:9px}
+  .slider-row .top .v{font-family:var(--font-m);color:var(--accent-2)}
+  .track{height:5px;background:var(--surface-3);border-radius:3px;position:relative}
+  .track .fill{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:3px;width:62%}
+  .track .knob{position:absolute;top:50%;left:62%;transform:translate(-50%,-50%);width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,0.4)}
+
+  .save-bar{position:sticky;bottom:0;display:flex;justify-content:flex-end;gap:10px;padding:14px 0;margin-top:18px;border-top:1px solid var(--border)}
+  .btn{padding:9px 18px;border-radius:9px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--surface-2);color:var(--text);transition:.15s}
+  .btn:hover{background:var(--surface-3)}
+  .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#0A0A0C;border:0;font-weight:600;box-shadow:0 6px 16px -6px rgba(139,124,255,0.6)}
+  .btn.primary:hover{filter:brightness(1.08);transform:translateY(-1px)}
+
+  /* view switch */
+  .view-toggle{
+    position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:50;
+    display:flex;gap:2px;padding:4px;border-radius:11px;
+    background:rgba(20,20,26,0.85);backdrop-filter:blur(14px);
+    border:1px solid var(--border-strong);box-shadow:0 12px 40px -8px rgba(0,0,0,0.6);
+  }
+  .view-toggle button{
+    padding:7px 16px;border:0;background:none;color:var(--text-2);font-size:12.5px;font-weight:500;
+    border-radius:8px;cursor:pointer;font-family:var(--font-b);transition:.15s;
+  }
+  .view-toggle button.on{background:var(--accent-soft);color:var(--accent-2)}
+
+  .hidden{display:none !important}
+
+  .switch-anim{animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2 L14.5 9.5 L22 12 L14.5 14.5 L12 22 L9.5 14.5 L2 12 L9.5 9.5 Z" fill="#fff"/></svg>
+      </div>
+      <div>
+        <div class="name">杏铃</div>
+        <div class="sub">Xingling Chat</div>
+      </div>
+    </div>
+
+    <div class="new-chat">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      新对话
+      <span class="kbd">⌘N</span>
+    </div>
+
+    <div class="search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input placeholder="搜索会话…" />
+    </div>
+
+    <div class="list-label">会话 <span class="count">12</span></div>
+    <div class="conv-scroll">
+      <div class="conv active">
+        <div class="t"><span class="dot"></span><span class="name">Flutter 前端架构选型</span></div>
+        <div class="preview">Provider vs Riverpod 的取舍，以及如何接入 ChatProvider…</div>
+        <div class="meta"><span class="svc">deepseek</span><span class="time">刚刚</span></div>
+      </div>
+      <div class="conv">
+        <div class="t"><span class="name">双轨记忆系统设计复盘</span></div>
+        <div class="preview">MemU WAL 预写日志与 MemLocal 短期上下文的协作…</div>
+        <div class="meta"><span class="svc">gemini</span><span class="time">2h</span></div>
+      </div>
+      <div class="conv">
+        <div class="t"><span class="name">Agent 风险分级实现</span></div>
+        <div class="preview">4 级风险守卫 + 银行保护 + 操作审计日志…</div>
+        <div class="meta"><span class="svc">zhipu</span><span class="time">昨天</span></div>
+      </div>
+      <div class="conv">
+        <div class="t"><span class="name">17 家 AI 服务接入对比</span></div>
+        <div class="preview">统一抽象接口与工厂模式创建实例的取舍…</div>
+        <div class="meta"><span class="svc">tongyi</span><span class="time">3d</span></div>
+      </div>
+      <div class="conv">
+        <div class="t"><span class="name">NCNN TTS 三层桥接</span></div>
+        <div class="preview">C++ / Kotlin / Dart 三层调用链路梳理…</div>
+        <div class="meta"><span class="svc">moonshot</span><span class="time">5d</span></div>
+      </div>
+      <div class="conv">
+        <div class="t"><span class="name">OCR 多引擎切换方案</span></div>
+        <div class="preview">本地 ML Kit 与百度/腾讯/阿里云的统一抽象…</div>
+        <div class="meta"><span class="svc">doubao</span><span class="time">1w</span></div>
+      </div>
+      <div class="conv">
+        <div class="t"><span class="name">会话持久化迁移策略</span></div>
+        <div class="preview">Hive NoSQL 与 JSON 文件双写的取舍…</div>
+        <div class="meta"><span class="svc">spark</span><span class="time">2w</span></div>
+      </div>
+    </div>
+
+    <div class="sidebar-foot">
+      <div class="foot-item" data-view="chat" id="navChat">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.4A8 8 0 1 1 21 12Z"/></svg>
+        对话
+      </div>
+      <div class="foot-item" data-view="settings" id="navSettings">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+        设置
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <main class="main">
+
+    <!-- ===== CHAT VIEW ===== -->
+    <div id="chatView" class="switch-anim" style="display:flex;flex-direction:column;height:100%">
+      <div class="topbar">
+        <div class="title">Flutter 前端架构选型</div>
+        <div class="model-chip">
+          <span class="av"></span>
+          DeepSeek · V4 Pro
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </div>
+        <span class="live-dot">流式中</span>
+        <div class="spacer"></div>
+        <div class="icon-btn" title="导出"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg></div>
+        <div class="icon-btn" title="更多"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg></div>
+      </div>
+
+      <div class="scroll">
+        <div class="thread">
+
+          <div class="msg">
+            <div class="av user">你</div>
+            <div class="body">
+              <div class="who">你</div>
+              <div class="user-bubble">帮我看一下，这个 Flutter 项目用什么状态管理比较合适？后端是基于 <code>ChangeNotifier</code> 的，前端接入需要最小改动。</div>
+            </div>
+          </div>
+
+          <div class="msg">
+            <div class="av ai">✦</div>
+            <div class="body">
+              <div class="who">杏铃 · DeepSeek</div>
+              <div class="bubble">
+                后端已经基于 <code>ChangeNotifier</code> 构建（<code>ChatProvider</code> 是 Facade），所以前端直接用 <strong>Provider</strong> 接入是改动最小的方案，无需引入新依赖。
+                <div class="reasoning">
+                  <div class="rh">
+                    <svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l2 2"/></svg>
+                    <span class="lbl">思考过程</span>
+                    <span class="ts">2.3s · 184 tokens</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+                  </div>
+                </div>
+                <pre><span class="cmt">// main.dart —— 用 MultiProvider 一次注入所有 Provider</span>
+MultiProvider(
+  providers: [
+    ChangeNotifierProvider&lt;ChatProvider&gt;(
+      create: (_) =&gt; bootstrap.chatProvider,
+    ),
+  ],
+  child: const XinglingApp(),
+);</pre>
+                主要原因有三点：
+                <br>1. <strong>零额外依赖</strong>：<code>provider</code> 已是后端库的传递依赖；
+                <br>2. <strong>Facade 已就绪</strong>：<code>ChatProvider</code> 暴露了 <code>messages / isStreaming / sendMessage</code> 等全部 UI 所需接口；
+                <br>3. <strong>生命周期可控</strong>：流式状态由 <code>ChatSendOrchestrator</code> 自管，UI 只需监听 <code>notifyListeners</code>。
+
+                <div class="sources">
+                  <div class="sh"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg> 联网检索 · 4 条来源</div>
+                  <div class="src"><span class="n">1</span><span class="tt">Provider 状态管理官方文档 — Flutter</span><a>flutter.dev</a></div>
+                  <div class="src"><span class="n">2</span><span class="tt">ChangeNotifier 在大型应用中的实践</span><a>dart.dev</a></div>
+                  <div class="src"><span class="n">3</span><span class="tt">Facade 模式与 God Class 拆分</span><a>refactoring.guru</a></div>
+                </div>
+              </div>
+              <div class="msg-actions">
+                <button><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>复制</button>
+                <button><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9M3 4v5h5"/></svg>重试</button>
+                <button><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4h6v6M20 4 10 14M19 14v6h-6"/></svg>引用</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="msg">
+            <div class="av user">你</div>
+            <div class="body">
+              <div class="who">你</div>
+              <div class="user-bubble">那给我一个能跑起来的最小骨架吧，连接到 ChatProvider。</div>
+            </div>
+          </div>
+
+          <div class="msg">
+            <div class="av ai">✦</div>
+            <div class="body">
+              <div class="who">杏铃 · DeepSeek</div>
+              <div class="bubble">
+                <div class="streaming-row">
+                  好的，下面是一个最小可运行骨架，包含启动编排与 Provider 注入
+                  <span class="caret"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="composer-wrap">
+        <div class="composer">
+          <textarea class="ta" placeholder="给杏铃发消息…  （Enter 发送 / Shift+Enter 换行）" rows="1"></textarea>
+          <div class="row">
+            <button class="tool"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21.4 11.05 12.25 20.2a5 5 0 0 1-7.07-7.07l9.19-9.19a3 3 0 0 1 4.24 4.24l-9.2 9.19a1 1 0 0 1-1.41-1.41l8.49-8.49"/></svg>附件</button>
+            <button class="tool on"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>联网</button>
+            <button class="tool"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 19v3"/></svg>语音</button>
+            <span class="tok"><b>1,284</b> / 131,072 tokens</span>
+            <button class="send stop" title="停止生成"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg></button>
+          </div>
+        </div>
+        <div class="hint">杏铃可能出错，请核对重要信息。对话与记忆均存储在本地。</div>
+      </div>
+    </div>
+
+    <!-- ===== SETTINGS VIEW ===== -->
+    <div id="settingsView" class="hidden settings-view switch-anim">
+      <div class="settings-wrap">
+        <h1 class="settings-h">设置</h1>
+        <p class="settings-sub">AI 服务、模型与联网检索配置。所有密钥通过硬件加密安全存储。</p>
+
+        <div class="sec">
+          <div class="sec-title">AI 服务商</div>
+          <div class="card">
+            <div class="ai-grid">
+              <div class="ai-card sel"><div class="ic" style="background:linear-gradient(135deg,#4D6BFE,#7C6FF0)">D</div><div class="nm">DeepSeek</div><svg class="chk" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
+              <div class="ai-card"><div class="ic" style="background:linear-gradient(135deg,#34A853,#4ADE9D)">G</div><div class="nm">Gemini</div></div>
+              <div class="ai-card"><div class="ic" style="background:linear-gradient(135deg,#10A37F,#1A7F64)">O</div><div class="nm">OpenAI</div></div>
+              <div class="ai-card"><div class="ic" style="background:linear-gradient(135deg,#615CED,#8B7CFF)">智</div><div class="nm">智谱</div></div>
+              <div class="ai-card"><div class="ic" style="background:linear-gradient(135deg,#FF6A00,#FF9444)">月</div><div class="nm">Kimi</div></div>
+              <div class="ai-card"><div class="ic" style="background:linear-gradient(135deg,#615CED,#A78BFA)">通</div><div class="nm">通义</div></div>
+              <div class="ai-card"><div class="ic" style="background:linear-gradient(135deg,#0052FF,#3B82F6)">豆</div><div class="nm">豆包</div></div>
+              <div class="ai-card"><div class="ic" style="background:linear-gradient(135deg,#525252,#737373)">+</div><div class="nm">自定义</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-title">凭证与模型</div>
+          <div class="card">
+            <div class="field">
+              <div class="fl">API Key <span class="req">*</span></div>
+              <input class="input mono" type="password" placeholder="sk-••••••••••••••••••••" value="sk-abcd1234efgh5678ijkl" />
+            </div>
+            <div class="select-row"><span class="l">模型</span><span class="v">deepseek-v4-pro ▾</span></div>
+            <div class="select-row"><span class="l">上下文长度</span><span class="v">131,072 tokens</span></div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-title">生成参数</div>
+          <div class="card">
+            <div class="slider-row">
+              <div class="top"><span>Temperature</span><span class="v">0.7</span></div>
+              <div class="track"><div class="fill" style="width:70%"></div><div class="knob" style="left:70%"></div></div>
+            </div>
+            <div class="slider-row">
+              <div class="top"><span>Max Tokens</span><span class="v">4096</span></div>
+              <div class="track"><div class="fill" style="width:30%"></div><div class="knob" style="left:30%"></div></div>
+            </div>
+            <div class="slider-row">
+              <div class="top"><span>Top P</span><span class="v">0.9</span></div>
+              <div class="track"><div class="fill" style="width:90%"></div><div class="knob" style="left:90%"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-title">联网与能力</div>
+          <div class="card">
+            <div class="row-item">
+              <div class="ic-w"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></div>
+              <div class="lbl"><div class="n">联网搜索</div><div class="d">回复前先检索网络，4 引擎可选</div></div>
+              <div class="toggle on"></div>
+            </div>
+            <div class="row-item">
+              <div class="ic-w"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 2v6l-4 4v8h14v-8l-4-4V2"/></svg></div>
+              <div class="lbl"><div class="n">双轨长期记忆</div><div class="d">MemU 智能记忆 + MemLocal 短期上下文</div></div>
+              <div class="toggle on"></div>
+            </div>
+            <div class="row-item">
+              <div class="ic-w"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 9h6v6H9z"/></svg></div>
+              <div class="lbl"><div class="n">OCR 文字识别</div><div class="d">本地 ML Kit + 云端引擎</div></div>
+              <div class="toggle"></div>
+            </div>
+            <div class="row-item">
+              <div class="ic-w"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0"/></svg></div>
+              <div class="lbl"><div class="n">语音输入</div><div class="d">本地 sherpa_onnx + 云端识别</div></div>
+              <div class="toggle"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <div class="sec-title">数据</div>
+          <div class="card">
+            <div class="row-item">
+              <div class="ic-w"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg></div>
+              <div class="lbl"><div class="n">导出备份</div><div class="d">将所有会话与记忆导出为 JSON</div></div>
+              <span class="v" style="color:var(--text-3);font-size:12px">›</span>
+            </div>
+            <div class="row-item">
+              <div class="ic-w"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 17v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg></div>
+              <div class="lbl"><div class="n">导入备份</div><div class="d">从 JSON 文件恢复</div></div>
+              <span class="v" style="color:var(--text-3);font-size:12px">›</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="save-bar">
+          <button class="btn">重置</button>
+          <button class="btn primary">保存并应用</button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="view-toggle">
+  <button class="on" data-view="chat">对话视图</button>
+  <button data-view="settings">设置视图</button>
+</div>
+
+<script>
+  const chat = document.getElementById('chatView');
+  const settings = document.getElementById('settingsView');
+  const navChat = document.getElementById('navChat');
+  const navSettings = document.getElementById('navSettings');
+  function show(v){
+    if(v==='settings'){chat.classList.add('hidden');settings.classList.remove('hidden');navChat.classList.remove('active');navSettings.classList.add('active');}
+    else{settings.classList.add('hidden');chat.classList.remove('hidden');navChat.classList.add('active');navSettings.classList.remove('active');}
+    settings.classList.remove('switch-anim');void settings.offsetWidth;settings.classList.add('switch-anim');
+    chat.classList.remove('switch-anim');void chat.offsetWidth;chat.classList.add('switch-anim');
+    document.querySelectorAll('.view-toggle button').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
+  }
+  document.querySelectorAll('[data-view]').forEach(el=>el.addEventListener('click',()=>show(el.dataset.view)));
+  navChat.classList.add('active');
+
+  // auto-grow textarea
+  const ta=document.querySelector('.ta');
+  ta.addEventListener('input',()=>{ta.style.height='auto';ta.style.height=Math.min(ta.scrollHeight,200)+'px';});
+  // conv select
+  document.querySelectorAll('.conv').forEach(c=>c.addEventListener('click',()=>{
+    document.querySelectorAll('.conv').forEach(x=>x.classList.remove('active'));
+    c.classList.add('active');
+  }));
+  // ai card select
+  document.querySelectorAll('.ai-card').forEach(c=>c.addEventListener('click',()=>{
+    document.querySelectorAll('.ai-card').forEach(x=>x.classList.remove('sel'));
+    c.classList.add('sel');
+  }));
+  // toggle
+  document.querySelectorAll('.toggle').forEach(t=>t.addEventListener('click',()=>t.classList.toggle('on')));
+</script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+# 杏铃聊天后端开源版（Community Edition）
+# 做什么：声明本后端库的元信息、依赖与版本。
+# 为什么这样做：原项目 pubspec.yaml 是 application 形式（含 UI/资源/平台配置），
+# 开源后端库仅保留后端代码实际 import 的第三方包，移除 UI 相关依赖。
+# 依赖精简依据：community_edition/lib/ 下 96 个 .dart 文件实际 import 统计。
+name: xingling_chat_community
+description: "杏铃聊天后端开源版 - 多 AI 接入 / 双轨长期记忆 / Agent 自动化的 Flutter 后端库（不含 UI）"
+publish_to: 'none' # 如需发布到 pub.dev，移除本行并补充 repository/homepage 字段
+
+# 版本号规则：开源版独立版本号，从 1.0.0 起步。
+# 与原完整项目（1.9xx 体系）解耦，便于社区版独立演进。
+# 语义化版本：MAJOR.MINOR.PATCH+BUILD
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.1
+
+dependencies:
+  # Flutter SDK：后端大量使用 ChangeNotifier / debugPrint / MethodChannel 等
+  # Flutter 基础设施，故仍需依赖 Flutter SDK（非纯 Dart 库）。
+  flutter:
+    sdk: flutter
+
+  # 网络请求：11 个文件使用（AI 服务、搜索、OCR、云端语音）
+  dio: ^5.4.0
+
+  # 环境变量加载：ai_service_factory 用于从 .env 读取默认 API Key
+  flutter_dotenv: ^5.1.0
+
+  # 本地 NoSQL 存储：5 个文件 import hive，10 个文件 import hive_flutter
+  # 用于会话/消息/记忆/设置持久化
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+
+  # 文件系统路径：9 个 service 用于获取应用文档目录/缓存目录
+  path_provider: ^2.1.2
+
+  # 结构化日志：app_logger 使用
+  logger: ^2.0.2+1
+
+  # 安全存储：secure_storage_service 用于 API Key 等敏感信息（硬件加密）
+  flutter_secure_storage: ^9.2.2
+
+  # 语音录制：2 个 service（sherpa_onnx_speech_service / speech_recognition_service）
+  record: ^6.2.0
+
+  # 云端语音识别：speech_recognition_service 使用
+  speech_to_text: ^7.0.0
+
+  # 本地语音识别（ONNX 模型）：sherpa_onnx_speech_service 使用
+  sherpa_onnx: ^1.13.2
+
+  # OCR 文字识别：ocr_service 使用（本地 ML Kit）
+  google_mlkit_text_recognition: ^0.15.0
+
+  # 系统分享：chat_export_service 用于将聊天记录导出到其他应用
+  # 注意：虽归类为 UI 包，但后端调用 Share.shareXFiles() 实现导出能力
+  share_plus: ^10.0.0
+
+  # ── 前端 UI 依赖（社区版新增，用于连接后端 Provider/Service）──
+  # 状态注入：将 ChatProvider / SettingsService 注入 widget 树
+  provider: ^6.1.1
+
+  # Markdown 渲染：AI 回复以 Markdown 呈现（代码块/列表/加粗等）
+  flutter_markdown: ^0.7.4+1
+
+  # 字体：Sora（标题）+ Manrope（正文），与设计画布一致；离线时回退系统字体
+  google_fonts: ^6.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  # Lint 规则：与原项目保持一致
+  flutter_lints: ^6.0.0
+  saropa_lints: ^13.12.1
+
+# 社区版现已包含前端 UI（lib/main.dart + lib/screens/ + lib/theme/）。
+# 平台配置（android/ ios/ linux/ macos/ windows）需在本地执行
+# `flutter create . --platforms=android,linux,macos,windows` 生成（非破坏性，仅补全缺失目录）。
+flutter:
+  uses-material-design: true

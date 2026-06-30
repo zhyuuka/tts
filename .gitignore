@@ -1,0 +1,61 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# Security - Never commit secrets
+.env
+.env.*
+!.env.example
+
+# Obfuscation debug symbols
+build/obfuscate_split/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# VS Code（可选，开发者可自行决定是否纳入版本控制）
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+/coverage/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Generated files（如果未来引入 build_runner）
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+
+# 本开源版不含 Android/iOS 平台目录，以下规则保留以备使用方扩展
+/android/app/debug
+/android/app/profile
+/android/app/release
+
+# Saropa lints 报告缓存（含开发机本地路径，不应纳入版本控制）
+reports/
+.saropa_session
+.saropa_lints/
