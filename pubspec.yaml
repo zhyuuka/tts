@@ -55,7 +55,7 @@ dependencies:
 
   # 系统分享：chat_export_service 用于将聊天记录导出到其他应用
   # 注意：虽归类为 UI 包，但后端调用 Share.shareXFiles() 实现导出能力
-  share_plus: ^10.0.0
+  share_plus: ^12.0.2
 
   # ── 前端 UI 依赖（社区版新增，用于连接后端 Provider/Service）──
   # 状态注入：将 ChatProvider / SettingsService 注入 widget 树
